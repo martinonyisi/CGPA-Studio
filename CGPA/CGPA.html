@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>CGPA Calculator</title>
+  <!-- FAVICON -->
+  <link href="images/Martony.png" rel="shortcut icon" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- html2canvas for PNG export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e8eff9 0%, #d0ddee 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem;
+      transition: background 0.3s ease;
+    }
+
+    /* main card with glassmorphism + micro animations */
+    .cgpa-studio {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border-radius: 3rem;
+      box-shadow: 0 35px 75px rgba(20, 40, 70, 0.3), 0 10px 25px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.6) inset;
+      padding: 2rem 1.8rem;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+    .cgpa-studio:hover {
+      box-shadow: 0 40px 85px rgba(16, 35, 60, 0.35);
+    }
+
+    /* header with floating effect */
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #132b44, #203e62);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.25rem;
+      filter: drop-shadow(0 4px 6px rgba(0,20,40,0.15));
+      animation: float 6s infinite ease-in-out;
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .subhead {
+      color: #2e5073;
+      font-weight: 400;
+      margin-bottom: 1.6rem;
+      border-left: 5px solid #527aab;
+      padding-left: 1.2rem;
+      background: rgba(82, 122, 171, 0.06);
+      border-radius: 0 20px 20px 0;
+      transition: 0.2s;
+    }
+
+    /* grade scale pill with shimmer */
+    .grade-pill {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.2rem;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 1rem 1.8rem;
+      border-radius: 60px;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #153450;
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 6px 12px rgba(44, 62, 90, 0.1), inset 0 0 0 1px rgba(255,255,255,0.8);
+      transition: all 0.2s;
+    }
+    .grade-pill:hover {
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 18px rgba(36, 58, 88, 0.15);
+    }
+    .grade-pill span {
+      background: white;
+      padding: 0.3rem 1.2rem;
+      border-radius: 40px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+      transition: 0.1s transform;
+    }
+    .grade-pill span:hover {
+      transform: scale(1.02);
+      background: #f5faff;
+    }
+
+    /* semester cards with soft 3d / lift effect */
+    .semester-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 2.2rem;
+      padding: 1.6rem 1.4rem;
+      margin-bottom: 1.8rem;
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 15px 25px rgba(38, 55, 85, 0.1), 0 2px 0 0 rgba(255,255,255,0.8) inset;
+      transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+    .semester-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 28px 38px rgba(20, 40, 65, 0.2);
+    }
+
+    .semester-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .semester-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1b3858;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .semester-name-input {
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: rgba(250, 253, 255, 0.9);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 50px;
+      padding: 0.4rem 1.2rem;
+      width: auto;
+      min-width: 180px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+      transition: 0.15s;
+    }
+    .semester-name-input:focus {
+      border-color: #6d9bda;
+      background: white;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(109,155,218,0.3);
+    }
+
+    .remove-semester {
+      background: rgba(255,255,255,0.6);
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #617e9e;
+      width: 40px;
+      height: 40px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: 0.15s;
+    }
+    .remove-semester:hover {
+      background: #fbe3e6;
+      color: #c24a4a;
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    /* course rows with micro interactions */
+    .course-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+    .course-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.6rem 1rem;
+      border-radius: 60px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.02), 0 0 0 1px rgba(255,255,255,0.8);
+      transition: 0.15s;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .course-row:hover {
+      background: white;
+      box-shadow: 0 8px 18px rgba(50, 70, 100, 0.1);
+      transform: scale(1.003);
+    }
+    .course-row input {
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      background: #f0f7ff;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .course-row input:focus {
+      border-color: #6f9bd1;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(111,155,209,0.25);
+    }
+    .course-name { flex: 2 1 130px; }
+    .course-credit { flex: 0 0 85px; }
+    .course-score { flex: 0 0 100px; }
+    .delete-course {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: #97adc9;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.15s;
+    }
+    .delete-course:hover {
+      background: #f8e3e5;
+      color: #c63f3f;
+      transform: scale(1.15);
+    }
+
+    .semester-actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.6rem;
+    }
+    .btn-sm {
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(4px);
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 6px 10px rgba(0,0,0,0.02);
+      border: 1px solid rgba(255,255,255,0.7);
+      transition: 0.12s;
+    }
+    .btn-sm:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 18px rgba(46, 75, 110, 0.12);
+    }
+
+    /* global actions */
+    .global-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin: 2rem 0 1.8rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 60px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(0,20,40,0.1);
+      border: 1px solid rgba(255,255,255,0.8);
+      color: #1b3858;
+      transition: 0.15s;
+    }
+    .btn-primary {
+      background: #153450;
+      color: white;
+      box-shadow: 0 14px 22px #142e4740;
+    }
+    .btn-primary:hover {
+      background: #1f4062;
+      transform: translateY(-3px);
+      box-shadow: 0 20px 28px #102a4040;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,1);
+    }
+
+    /* previous GPA row */
+    .prev-gpa-row {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem 2rem;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 1rem 2rem;
+      border-radius: 80px;
+      margin-bottom: 1.8rem;
+      border: 1px solid white;
+    }
+    .prev-gpa-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prev-gpa-item label { font-weight: 500; color: #1e3d5e; }
+    .prev-gpa-item input {
+      border: none;
+      background: white;
+      padding: 0.6rem 1rem;
+      border-radius: 60px;
+      width: 100px;
+      text-align: center;
+      font-weight: 600;
+      border: 1px solid #c1d4ec;
+      transition: 0.15s;
+    }
+    .prev-gpa-item input:focus {
+      border-color: #5d8ac0;
+      box-shadow: 0 0 0 3px rgba(93,138,192,0.3);
+      outline: none;
+    }
+
+    /* result panel with glow */
+    .cgpa-summary {
+      background: rgba(220, 237, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 4rem;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid white;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 18px 30px rgba(32, 60, 100, 0.15);
+      transition: all 0.2s;
+      margin-top: 1.5rem;
+    }
+    .cgpa-block {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .cgpa-big {
+      font-size: 3.2rem;
+      font-weight: 800;
+      background: linear-gradient(145deg, #123458, #233f68);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 6px rgba(0,30,70,0.2));
+      line-height: 1;
+    }
+
+    /* save button special */
+    #savePngBtn {
+      background: #2b5f3b;
+      color: white;
+      border: none;
+      box-shadow: 0 12px 20px #1d4a2b60;
+    }
+    #savePngBtn:hover {
+      background: #1f4a2c;
+    }
+
+    /* mobile first fine-tuning */
+    @media (max-width: 600px) {
+      .cgpa-studio { padding: 1.5rem 1rem; border-radius: 2rem; }
+      h1 { font-size: 1.9rem; }
+      .course-row { flex-wrap: wrap; padding: 0.8rem; border-radius: 35px; }
+      .course-name { flex: 1 1 100%; }
+      .course-credit, .course-score { flex: 1 1 80px; }
+      .delete-course { order: 4; margin-left: auto; }
+      .prev-gpa-row { border-radius: 40px; padding: 1.2rem; justify-content: center; }
+      .global-actions .btn { padding: 0.7rem 1.2rem; }
+      .cgpa-summary { flex-direction: column; align-items: start; gap: 1rem; }
+      .grade-pill span { padding: 0.2rem 0.9rem; font-size: 0.8rem; }
+    }
+    @media (max-width: 380px) {
+      .btn { font-size: 0.8rem; padding: 0.7rem 1rem; }
+    }
+
+    /* loading / saved animation */
+    .ripple-effect {
+      position: relative;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+<div class="cgpa-studio" id="cgpaStudioCard">
+  <h1>CGPA Studio · Save PNG</h1>
+  <div class="subhead">Percentage scores → GPA · Combine semesters · Export as image</div>
+
+  <!-- grade scale card with hover -->
+  <div class="grade-pill">
+    <span>🌟 70–100 → 5.0 (A)</span>
+    <span>📌 60–69 → 4.0 (B)</span>
+    <span>🔹 50–59 → 3.0 (C)</span>
+    <span>📙 45–49 → 2.0 (D)</span>
+    <span>📒 40–44 → 1.0 (E)</span>
+    <span>⚡ 0–39 → 0.0 (F)</span>
+  </div>
+
+  <!-- container for dynamic semesters -->
+  <div id="semestersContainer" style="transition: all 0.2s;"></div>
+
+  <!-- global action buttons + new PNG button -->
+  <div class="global-actions">
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+      <button class="btn" id="addSemesterBtn">➕ New Semester</button>
+      <button class="btn" id="resetBtn">🔄 Reset</button>
+      <button class="btn" id="savePngBtn">📸 Save as PNG</button>
+    </div>
+    <button class="btn btn-primary" id="calculateOverallBtn">📊 Update CGPA</button>
+  </div>
+
+  <!-- previous GPA row -->
+  <div class="prev-gpa-row">
+    <div class="prev-gpa-item"><label>🎓 prev CGPA:</label><input type="number" id="prevCgpa" step="0.01" min="0" max="5" value="0.0"></div>
+    <div class="prev-gpa-item"><label>📚 prev credits:</label><input type="number" id="prevCredits" step="0.5" min="0" value="0"></div>
+    <span style="color:#627b9c;">⸻⸻</span>
+  </div>
+
+  <!-- FINAL DISPLAY AREA (will be captured in PNG) -->
+  <div class="cgpa-summary" id="cgpaSummary">
+    <div class="cgpa-block">
+      <span style="font-weight:500; color:#113355;">Cumulative CGPA</span>
+      <span class="cgpa-big" id="finalCgpa">0.000</span>
+    </div>
+    <div style="background:#e2efff; padding:0.5rem 1.8rem; border-radius:60px; font-weight:500;" id="totalCreditsDisplay">
+      🧾 0.0 credits
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- percentage → GPA (5.0 scale) ----------
+    function percentageToGPA(score) {
+      if (score === '' || score === null || isNaN(score)) return null;
+      const s = parseFloat(score);
+      if (s < 0 || s > 100) return null;
+      if (s >= 70) return 5.0;
+      if (s >= 60) return 4.0;
+      if (s >= 50) return 3.0;
+      if (s >= 45) return 2.0;
+      if (s >= 40) return 1.0;
+      return 0.0;
+    }
+
+    let semesters = [];
+
+    function getDefaultSemesters() {
+      return [
+        { id: 'sem1_' + Date.now(), name: 'Semester 1 (freshman)', courses: [ { name: 'Calculus I', credit: 4, score: 82 }, { name: 'Physics', credit: 3, score: 67 }, { name: 'CS intro', credit: 3, score: 91 } ] },
+        { id: 'sem2_' + Date.now(), name: 'Semester 2', courses: [ { name: 'Linear Algebra', credit: 3, score: 58 }, { name: 'Digital Logic', credit: 3, score: 74 }, { name: 'English', credit: 2, score: 88 } ] }
+      ];
+    }
+    semesters = getDefaultSemesters();
+
+    const container = document.getElementById('semestersContainer');
+    const addSemesterBtn = document.getElementById('addSemesterBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const calculateBtn = document.getElementById('calculateOverallBtn');
+    const savePngBtn = document.getElementById('savePngBtn');
+    const finalCgpaSpan = document.getElementById('finalCgpa');
+    const totalCreditsSpan = document.getElementById('totalCreditsDisplay');
+    const prevCgpaInput = document.getElementById('prevCgpa');
+    const prevCreditsInput = document.getElementById('prevCredits');
+
+    function generateSemesterId() { return 'sem_' + Date.now() + '_' + Math.random().toString(36).substring(2,8); }
+
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return String(unsafe).replace(/[&<>"]/g, function(m) {
+        if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; if (m === '"') return '&quot;';
+        return m;
+      });
+    }
+
+    function renderAll() {
+      let html = '';
+      semesters.forEach((sem, semIndex) => {
+        html += `<div class="semester-card" data-semindex="${semIndex}">`;
+        html += `<div class="semester-header">`;
+        html += `<div class="semester-title"><span>📘</span><input type="text" value="${escapeHtml(sem.name)}" class="semester-name-input" data-index="${semIndex}"></div>`;
+        html += `<button class="remove-semester" data-index="${semIndex}" title="remove semester">✕</button>`;
+        html += `</div><div class="course-grid">`;
+        sem.courses.forEach((course, cIdx) => {
+          html += `<div class="course-row" data-course-index="${cIdx}">`;
+          html += `<input type="text" class="course-name" placeholder="Course" value="${escapeHtml(course.name)}" data-sem="${semIndex}" data-course="${cIdx}">`;
+          html += `<input type="number" class="course-credit" placeholder="Credits" value="${course.credit}" step="0.5" min="0" data-sem="${semIndex}" data-course="${cIdx}">`;
+          html += `<input type="number" class="course-score" placeholder="Score %" value="${course.score}" step="0.1" min="0" max="100" data-sem="${semIndex}" data-course="${cIdx}">`;
+          html += `<button class="delete-course" data-sem="${semIndex}" data-course="${cIdx}">✕</button>`;
+          html += `</div>`;
+        });
+        html += `</div><div class="semester-actions"><button class="btn-sm add-course-btn" data-semindex="${semIndex}">➕ add course</button></div>`;
+        html += `</div>`;
+      });
+      container.innerHTML = html;
+      attachSemesterEvents();
+      calculateOverallCGPA();
+    }
+
+    function attachSemesterEvents() {
+      document.querySelectorAll('.semester-name-input').forEach(inp => {
+        inp.addEventListener('input', function(e) {
+          const idx = this.dataset.index; if (semesters[idx]) semesters[idx].name = this.value;
+        });
+      });
+      document.querySelectorAll('.remove-semester').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const idx = this.dataset.index; if (semesters.length <= 1) { alert('至少保留一个学期 (keep at least one)'); return; }
+          semesters.splice(idx, 1); renderAll();
+        });
+      });
+      document.querySelectorAll('.course-name').forEach(inp => {
+        inp.addEventListener('input', function(e) {
+          const s = this.dataset.sem, c = this.dataset.course; if (semesters[s]?.courses[c]) semesters[s].courses[c].name = this.value;
+        });
+      });
+      document.querySelectorAll('.course-credit').forEach(inp => {
+        inp.addEventListener('input', function(e) {
+          const s = this.dataset.sem, c = this.dataset.course; if (semesters[s]?.courses[c]) {
+            let val = parseFloat(this.value); if (isNaN(val) || val < 0) val = 0; semesters[s].courses[c].credit = val;
+          }
+        });
+      });
+      document.querySelectorAll('.course-score').forEach(inp => {
+        inp.addEventListener('input', function(e) {
+          const s = this.dataset.sem, c = this.dataset.course; if (semesters[s]?.courses[c]) {
+            let val = parseFloat(this.value); if (isNaN(val)) val = 0; if (val > 100) val = 100; if (val < 0) val = 0; semesters[s].courses[c].score = val; this.value = val;
+          }
+        });
+      });
+      document.querySelectorAll('.delete-course').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const s = this.dataset.sem, c = this.dataset.course; if (semesters[s]?.courses.length > 1) { semesters[s].courses.splice(c, 1); } else { alert('至少一门课'); return; } renderAll();
+        });
+      });
+      document.querySelectorAll('.add-course-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const s = this.dataset.semindex; if (semesters[s]) { semesters[s].courses.push({ name: 'New course', credit: 3, score: 65 }); renderAll(); }
+        });
+      });
+    }
+
+    function calculateOverallCGPA() {
+      let prevCgpa = parseFloat(prevCgpaInput.value) || 0; if (prevCgpa < 0) prevCgpa = 0;
+      let prevCredits = parseFloat(prevCreditsInput.value) || 0; if (prevCredits < 0) prevCredits = 0;
+      let totalWeighted = prevCgpa * prevCredits;
+      let totalCredits = prevCredits;
+      semesters.forEach(sem => {
+        sem.courses.forEach(course => {
+          const credit = (typeof course.credit === 'number' && !isNaN(course.credit)) ? course.credit : 0;
+          if (credit <= 0) return;
+          const score = course.score; if (score === undefined || isNaN(parseFloat(score))) return;
+          const gpa = percentageToGPA(parseFloat(score)); if (gpa !== null) { totalWeighted += gpa * credit; totalCredits += credit; }
+        });
+      });
+      let cumulative = totalCredits > 0 ? totalWeighted / totalCredits : 0;
+      cumulative = Math.round(cumulative * 1000) / 1000;
+      finalCgpaSpan.innerText = cumulative.toFixed(3);
+      totalCreditsSpan.innerText = `🧾 ${totalCredits.toFixed(1)} credits`;
+    }
+
+    // event listeners
+    addSemesterBtn.addEventListener('click', () => {
+      semesters.push({ id: generateSemesterId(), name: `Semester ${semesters.length+1}`, courses: [{ name: 'Course', credit: 3, score: 70 }] });
+      renderAll();
+    });
+    resetBtn.addEventListener('click', () => {
+      semesters = getDefaultSemesters(); prevCgpaInput.value = '0.0'; prevCreditsInput.value = '0'; renderAll();
+    });
+    calculateBtn.addEventListener('click', () => { calculateOverallCGPA(); });
+    prevCgpaInput.addEventListener('input', calculateOverallCGPA);
+    prevCreditsInput.addEventListener('input', calculateOverallCGPA);
+
+    // PNG capture with html2canvas
+    savePngBtn.addEventListener('click', function() {
+      const element = document.getElementById('cgpaStudioCard');
+      // subtle visual feedback
+      savePngBtn.style.transform = 'scale(0.95)';
+      setTimeout(() => savePngBtn.style.transform = '', 120);
+      
+      html2canvas(element, {
+        scale: 1.8,              // high res for clarity
+        backgroundColor: '#eaf1fc',
+        allowTaint: false,
+        useCORS: true,
+        logging: false,
+        windowWidth: element.scrollWidth,
+      }).then(canvas => {
+        // create download link
+        const link = document.createElement('a');
+        link.download = `cgpa-snapshot-${new Date().toISOString().slice(0,10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // brief animation
+        savePngBtn.innerText = '📸 saved!';
+        setTimeout(() => { savePngBtn.innerText = '📸 Save as PNG'; }, 1200);
+      }).catch(error => {
+        alert('截图失败, 但可手动保存 (png error)'); console.warn(error);
+        savePngBtn.innerText = '📸 retry';
+        setTimeout(() => { savePngBtn.innerText = '📸 Save as PNG'; }, 1000);
+      });
+    });
+
+    // initial render
+    renderAll();
+  })();
+</script>
+</body>
+</html>
